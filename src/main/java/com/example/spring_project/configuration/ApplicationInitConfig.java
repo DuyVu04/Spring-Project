@@ -1,7 +1,7 @@
 package com.example.spring_project.configuration;
 
 import com.example.spring_project.entity.User;
-import com.example.spring_project.enums.Role;
+import com.example.spring_project.repository.RoleRepository;
 import com.example.spring_project.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -22,16 +24,16 @@ import java.util.HashSet;
 public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
+            var roles = roleRepository.findByNameIn(List.of("ADMIN"));
             if(userRepository.findByUsername("admin").isEmpty()){
-                var roles = new HashSet<String>();
-                roles.add(Role.ADMIN.name());
                 User user = User.builder()
                         .username("admin")
-//                        .roles(roles)
+                        .roles(roles.stream().collect(HashSet::new, Set::add, Set::addAll))
                         .password(passwordEncoder.encode("admin"))
                         .build();
                 userRepository.save(user);

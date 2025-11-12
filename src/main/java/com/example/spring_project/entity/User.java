@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Setter
@@ -31,5 +32,5 @@ public class User {
     LocalDate dob;
 
     @ManyToMany
-    Set<Role> roles;
+    Set<Role> roles = new HashSet<>();
 }

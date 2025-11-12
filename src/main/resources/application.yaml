@@ -13,3 +13,8 @@ spring:
     show-sql: true
 jwt:
   signerKey: "3/zLgUkfAaz+33hZlD7IK+BjKYGgYZ+SrOq4ArMRoi49rVAsZ7BiZ6NyDYiXNOXv\n"
+  valid-duration: 3600 # in seconds
+  refreshable-duration: 7200 # in seconds
+
+payment:
+  method: creditCard

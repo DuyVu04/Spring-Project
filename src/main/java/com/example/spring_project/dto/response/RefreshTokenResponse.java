@@ -8,9 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
+public class RefreshTokenResponse {
     String token;
     boolean authenticated;
-    Long expiryIn;
-    Long refreshAbleIn;
 }
