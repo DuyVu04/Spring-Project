@@ -1,6 +1,7 @@
 package com.example.spring_project.configuration;
 
 import com.example.spring_project.entity.User;
+import com.example.spring_project.enums.MembershipType;
 import com.example.spring_project.repository.RoleRepository;
 import com.example.spring_project.repository.UserRepository;
 import lombok.AccessLevel;
@@ -35,6 +36,7 @@ public class ApplicationInitConfig {
                         .username("admin")
                         .roles(roles.stream().collect(HashSet::new, Set::add, Set::addAll))
                         .password(passwordEncoder.encode("admin"))
+                        .membershipType(MembershipType.PREMIUM)
                         .build();
                 userRepository.save(user);
                 log.warn("Admin user created with username: admin and password: admin please change it" );

@@ -20,6 +20,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(errorCode.getHttpStatusCode().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
+
+        String origin = request.getHeader("Origin");
+        if (origin != null && (origin.equals("http://localhost:3000") || origin.equals("http://localhost:5173"))) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+        }
+
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
@@ -27,8 +36,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
 
         ObjectMapper objectMapper = new ObjectMapper();
-
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse)); // write required string so need to convert from object to string using ObjectMapper
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
         response.flushBuffer();
     }
 }

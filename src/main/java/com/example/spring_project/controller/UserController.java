@@ -1,19 +1,21 @@
 package com.example.spring_project.controller;
 
+import com.example.spring_project.dto.request.UpdateFromUserRequest;
 import com.example.spring_project.dto.request.UserRequest;
 import com.example.spring_project.dto.request.UserUpdateRequest;
 import com.example.spring_project.dto.response.ApiResponse;
+import com.example.spring_project.dto.response.PageResponse;
 import com.example.spring_project.dto.response.UserResponse;
 import com.example.spring_project.entity.User;
 import com.example.spring_project.service.UserService;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.turkraft.springfilter.boot.Filter;
 
 import java.util.List;
 
@@ -33,20 +35,9 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping
-    ApiResponse<List<UserResponse>> getAllUser(){
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Username: {}",authentication.getName());
-        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
-
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getAllUsers())
-                .build();
-    }
-
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest userUpdateRequest) {
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<UserResponse> updateUser(@PathVariable Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUser(userId, userUpdateRequest))
                 .build();
@@ -60,19 +51,44 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/setting-update")
+    ApiResponse<UserResponse> updateFromUser(@RequestBody UpdateFromUserRequest userUpdateRequest) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateInformationFromUser(userUpdateRequest))
+                .build();
+    }
 
     @GetMapping("/{userId}")
-    ApiResponse<UserResponse> getUserId(@PathVariable String userId){
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<UserResponse> getUserId(@PathVariable Long userId){
         return ApiResponse.<UserResponse>builder()
                 .result( userService.getUser(userId))
                 .build();
     }
 
     @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder()
                 .message("User deleted successfully")
+                .build();
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<PageResponse<UserResponse>> getAll(
+            @Filter Specification<User> spec, Pageable page){
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .message("Get all user successfully")
+                .result(userService.getUsers(spec, page))
+                .build();
+    }
+
+    @GetMapping("/search")
+    ApiResponse<List<UserResponse>> search(@RequestParam String query) {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.searchUsers(query))
                 .build();
     }
 

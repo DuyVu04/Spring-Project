@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
+    @CacheEvict(value = "permissions", allEntries = true)
     public PermissionResponse create(PermissionRequest permissionRequest) {
 
         Permission permission = permissionMapper.toPermission(permissionRequest);
@@ -28,6 +31,7 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
+    @Cacheable(value = "permissions", key = "'all'", unless = "#result == null")
     public List<PermissionResponse> getAll() {
         var permissions = permissionRepository.findAll();
         return permissions.stream()
@@ -35,6 +39,7 @@ public class PermissionService {
                 .toList();
     }
 
+    @CacheEvict(value = "permissions", allEntries = true)
     public void delete(String permission) {
         permissionRepository.deleteById(permission);
     }

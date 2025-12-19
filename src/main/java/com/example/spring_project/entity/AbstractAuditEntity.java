@@ -8,8 +8,8 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -18,22 +18,18 @@ import java.time.ZonedDateTime;
 @MappedSuperclass
 @AllArgsConstructor
 @NoArgsConstructor
-@EnableJpaAuditing
 @EntityListeners(CustomAuditingEntityListener.class)
 public class AbstractAuditEntity {
 
-
-
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreatedDate
-    protected ZonedDateTime createdAt;
+    protected Instant createdAt;
 
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @LastModifiedDate
-    protected ZonedDateTime updatedAt;
+    protected Instant updatedAt;
 
     @LastModifiedBy
     protected String lastModifiedBy;
+
     @CreatedBy
     protected String createdBy;
 

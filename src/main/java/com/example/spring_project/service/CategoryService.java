@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class CategoryService {
     private final CategoryMapper categoryMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "categories", allEntries = true)
     public CategoryResponse createCategory(CategoryRequest request){
         if(categoryRepository.findByName(request.getName()).isPresent()){
             throw new RuntimeException("Category already exists");
@@ -36,12 +39,14 @@ public class CategoryService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @Cacheable(value = "categories", unless = "#result == null")
     public List<CategoryResponse> getAllCategories(){
         var categories = categoryRepository.findAll();
         return categoryMapper.toListCategoryResponse(categories);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(String categoryId){
         var category = categoryRepository.findById(categoryId)
                 .orElseThrow(()-> new RuntimeException("Category not found"));
