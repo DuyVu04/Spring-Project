@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -24,6 +26,7 @@ public class RoleService {
     RoleMapper roleMapper;
     PermissionRepository permissionRepository;
 
+    @CacheEvict(value = "roles", allEntries = true)
     public RoleResponse create (RoleRequest request){
         var role =roleMapper.toRole(request);
         var permission = permissionRepository.findAllById(request.getPermissions());
@@ -33,11 +36,13 @@ public class RoleService {
 
     }
 
+    @Cacheable(value = "roles", key = "'all'", unless = "#result == null")
     public List<RoleResponse> getAll(){
         var roles =roleRepository.findAll();
         return roles.stream().map(roleMapper::toRoleResponse).toList();
     }
 
+    @CacheEvict(value = "roles", allEntries = true)
     public void delete(String role){
         roleRepository.deleteById(role);
     }

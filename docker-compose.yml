@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  mysql:
+    container_name: fastenglish-mysql
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
+  redis:
+    container_name: fastenglish-redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  minio:
+    container_name: fastenglish-minio
+    image: minio/minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+
+  api-service:
+    container_name: fastenglish-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - minio
+    env_file:
+      - .env
+    ports:
+      - '8080:8080'
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+
+networks:
+  backend:
+    driver: bridge

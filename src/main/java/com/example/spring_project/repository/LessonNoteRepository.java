@@ -1,0 +1,16 @@
+package com.example.spring_project.repository;
+
+import com.example.spring_project.entity.LessonNote;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface LessonNoteRepository extends JpaRepository<LessonNote, UUID> {
+
+    List<LessonNote> findByUserIdAndLessonId(Long userId, UUID lessonId);
+
+    List<LessonNote> findByUserId(Long userId);
+}
